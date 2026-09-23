@@ -230,7 +230,7 @@ describe('schedule handler (GET /agendas + POST /agendamento)', () => {
       const result = await postRawBody(handler, '{"agendamento": {"medico_id": 1,');
 
       expect(result.statusCode).toBe(400);
-      expect(parseJsonBody(result)).toEqual(invalidPayload('body', 'deve ser um JSON válido'));
+      expect(parseJsonBody(result)).toEqual(invalidPayload('corpo', 'deve ser um JSON válido'));
     });
 
     it.each([
@@ -242,7 +242,7 @@ describe('schedule handler (GET /agendas + POST /agendamento)', () => {
       const result = await postRawBody(handler, body);
 
       expect(result.statusCode).toBe(400);
-      expect(parseJsonBody(result)).toEqual(invalidPayload('body', 'é obrigatório'));
+      expect(parseJsonBody(result)).toEqual(invalidPayload('corpo', 'é obrigatório'));
     });
 
     it('responde 400 para objeto JSON vazio, apontando agendamento', async () => {
@@ -401,6 +401,33 @@ describe('schedule handler (GET /agendas + POST /agendamento)', () => {
       expect(parseJsonBody(schedules)).toEqual(SEED_SCHEDULES);
       expect(created.statusCode).toBe(201);
       expect(parseJsonBody(created)).toEqual(CREATED_ENUNCIADO);
+    });
+  });
+
+  describe('evento com headers nulos (console da AWS, serverless invoke)', () => {
+    it('GET /agendas sem headers nem body responde 200 com o seed', async () => {
+      const { handler } = makeSut();
+      const result = await handler({
+        httpMethod: 'GET',
+        resource: '/agendas',
+        headers: null,
+        requestContext: { requestId: 'req-console' },
+      });
+
+      expect(result.statusCode).toBe(200);
+      expect(parseJsonBody(result)).toEqual(SEED_SCHEDULES);
+    });
+
+    it('POST /agendamento com headers nulos e JSON válido responde 201 (D24)', async () => {
+      const { handler } = makeSut();
+
+      const result = await handler({
+        ...aJsonPostEvent('/agendamento', anAppointmentPayload()),
+        headers: null,
+      });
+
+      expect(result.statusCode).toBe(201);
+      expect(parseJsonBody(result)).toEqual(CREATED_ENUNCIADO);
     });
   });
 

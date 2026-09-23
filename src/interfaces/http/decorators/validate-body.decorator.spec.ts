@@ -67,7 +67,7 @@ describe('ValidateBody', () => {
       const response = await controller.handle(anHttpRequest({ body }));
 
       expect(response.statusCode).toBe(400);
-      expect(response.body).toEqual(invalidPayload('body', 'é obrigatório'));
+      expect(response.body).toEqual(invalidPayload('corpo', 'é obrigatório'));
       expect(controller.receivedRequests).toHaveLength(0);
     },
   );
@@ -80,7 +80,7 @@ describe('ValidateBody', () => {
       const response = await controller.handle(anHttpRequest({ body }));
 
       expect(response.statusCode).toBe(400);
-      expect(response.body).toEqual(invalidPayload('body', 'deve ser um JSON válido'));
+      expect(response.body).toEqual(invalidPayload('corpo', 'deve ser um JSON válido'));
       expect(controller.receivedRequests).toHaveLength(0);
     },
   );
@@ -95,12 +95,12 @@ describe('ValidateBody', () => {
     expect(controller.receivedRequests).toHaveLength(0);
   });
 
-  it('usa "body" como campo quando o erro é na raiz do corpo', async () => {
+  it('usa "corpo" como campo quando o erro é na raiz do corpo', async () => {
     const controller = new ProbeController();
 
     const response = await controller.handle(aJsonHttpRequest([1, 2, 3]));
 
-    expect(response.body).toEqual(invalidPayload('body', 'deve ser um objeto JSON'));
+    expect(response.body).toEqual(invalidPayload('corpo', 'deve ser um objeto JSON'));
   });
 
   it('responde 400 com os headers JSON e CORS padrão', async () => {

@@ -48,7 +48,15 @@ precisam, além disso, de estado isolado por teste (`docs/regras/testes.md`).
 - Importar o módulo do handler cria o container padrão. Isso é barato, sem I/O; o log só escreve
   quando há requisição.
 - Rotas inexistentes nunca chegam à Lambda na AWS: o API Gateway responde com as `GatewayResponses`
-  (D19). O 500 do roteador cobre só a divergência entre `serverless.yml` e a tabela.
+  (D19). O 500 de rota ausente no roteador cobre só a divergência entre `serverless.yml` e a tabela.
+- O roteador também é a rede de segurança da função: um try/catch final transforma uma ação que
+  rejeite (ex.: método novo sem `@HandleHttpErrors`) em 500 genérico com JSON e CORS, em vez de erro
+  da Lambda (502 do gateway, fora do formato D9).
+- O roteador recebe um tipo de borda próprio (`ApiGatewayProxyEventInput`), não o
+  `APIGatewayProxyEvent`: `headers` e `body` podem vir nulos ou ausentes (console da AWS,
+  `serverless invoke`) e são normalizados em `toHttpRequest`, sem `as`. `requestContext`, `httpMethod`
+  e `resource` continuam obrigatórios, porque o API Gateway sempre os envia. A compatibilidade com o
+  tipo oficial é garantida pelo typecheck dos testes, que passam `APIGatewayProxyEvent` completos.
 - O arquivo do handler é `handlers/schedule-handler.ts`, e não `schedule.handler.ts` como no padrão de
   sufixos. O runtime Node da Lambda (`aws-lambda-ric`, o mesmo que o serverless-offline embute) separa
   a string do handler com `/^([^.]*)\.(.*)$/`, ou seja, no **primeiro** ponto do nome do arquivo:

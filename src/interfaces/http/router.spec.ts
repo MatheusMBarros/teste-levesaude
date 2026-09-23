@@ -4,7 +4,7 @@ import { parseJsonBody } from '../../../tests/helpers/json-body';
 import { JsonLogger } from '../../infrastructure/logger/json.logger';
 import type { HttpRequest } from './http-request';
 import { DEFAULT_HEADERS, createdResponse, okResponse } from './http-response';
-import type { RouteTable } from './router';
+import type { ApiGatewayProxyEventInput, RouteTable } from './router';
 import { createRouter, toApiGatewayResult, toHttpRequest } from './router';
 
 const INTERNAL_ERROR = {
@@ -48,6 +48,25 @@ describe('toHttpRequest', () => {
     const request = toHttpRequest(event);
 
     expect(request.headers).toEqual({ 'content-type': 'application/json', 'x-trace': 'abc' });
+  });
+
+  it('aceita evento com headers nulos e sem body, como numa invocação pelo console da AWS', () => {
+    const event: ApiGatewayProxyEventInput = {
+      httpMethod: 'GET',
+      resource: '/agendas',
+      headers: null,
+      requestContext: { requestId: 'req-console' },
+    };
+
+    const request = toHttpRequest(event);
+
+    expect(request).toEqual({
+      requestId: 'req-console',
+      method: 'GET',
+      resource: '/agendas',
+      headers: {},
+      body: null,
+    });
   });
 });
 
@@ -124,4 +143,30 @@ describe('createRouter', () => {
       expect(logs.text).toContain(resource);
     },
   );
+
+  it('responde 500 genérico com JSON e CORS e registra erro quando a ação rejeita', async () => {
+    const logs = captureLogs();
+    const router = createRouter(
+      { 'GET /agendas': () => Promise.reject(new Error('segredo-interno')) },
+      new JsonLogger(logs.write),
+    );
+
+    const result = await router(
+      anApiGatewayEvent({ method: 'GET', resource: '/agendas', requestId: 'req-falha' }),
+    );
+
+    expect(result.statusCode).toBe(500);
+    expect(result.headers).toEqual(DEFAULT_HEADERS);
+    expect(parseJsonBody(result)).toEqual(INTERNAL_ERROR);
+    expect(result.body).not.toContain('segredo-interno');
+    expect(logs.ofLevel('error')).toContainEqual(
+      expect.objectContaining({
+        message: 'Unhandled error in router',
+        requestId: 'req-falha',
+        method: 'GET',
+        resource: '/agendas',
+      }),
+    );
+    expect(logs.text).toContain('segredo-interno');
+  });
 });

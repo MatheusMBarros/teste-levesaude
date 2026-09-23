@@ -8,12 +8,13 @@ import type { ErrorAwareMethod } from './controller-method';
 
 /** Problema de validação de um campo do corpo; vira um item de `detalhes` no 400 (D8). */
 export interface ValidationIssue {
-  /** Caminho com pontos (`agendamento.medico_id`); `body` quando o problema é o corpo inteiro. */
+  /** Caminho com pontos (`agendamento.medico_id`); `corpo` quando o problema é o corpo inteiro. */
   readonly field: string;
   readonly problem: string;
 }
 
-const ROOT_FIELD = 'body';
+/** O `campo` vai para o cliente: segue o contrato em português (D8, D16). */
+const ROOT_FIELD = 'corpo';
 
 /** Bug de programação: o método leu o corpo validado sem ter `@ValidateBody` aplicado. */
 export class BodyNotValidatedError extends Error {
