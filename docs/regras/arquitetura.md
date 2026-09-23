@@ -11,6 +11,7 @@ src/
     value-objects/
     errors/
   application/       # casos de uso e portas (interfaces). Não conhece HTTP, AWS, Zod nem SDKs.
+    errors/          # erros de dependências da aplicação (triagem: 502/503/504), estendem DomainError
     ports/
     use-cases/
   infrastructure/    # implementações concretas das portas (in-memory, crypto, Anthropic, logger)
@@ -18,9 +19,10 @@ src/
     mocks/
     id-generator/
     logger/
-    llm/
+    llm/             # adapters de TriageModel (Anthropic, fake, indisponível) + schema da saída
+      prompts/       # prompts versionados (triage.prompt.v1.ts)
   interfaces/http/   # tradução HTTP <-> casos de uso
-    handlers/        # entrypoints Lambda (finos)
+    handlers/        # entrypoints Lambda (finos) + fábricas dos handlers (*-handler.factory.ts)
     controllers/     # classes com decorators
     decorators/
     schemas/         # Zod
@@ -40,7 +42,7 @@ Testes unitários ficam ao lado do código (`*.spec.ts`).
 
 Um handler só: recebe o evento → chama o controller do container → retorna. Nenhum `if` de negócio, nenhuma instância criada dentro dele.
 
-`GET /agendas` e `POST /agendamento` ficam na **mesma função Lambda** (`schedule`) para compartilharem o estado em memória (D15). O handler despacha por uma tabela declarativa `resource + httpMethod` → método do controller; rota fora da tabela é erro de configuração (500). `POST /triagem` é uma função separada.
+`GET /agendas`, `POST /agendamento` e `POST /triagem` ficam na **mesma função Lambda** (`schedule`) para compartilharem o estado em memória (D15, ADR-009): a triagem sugere horários que precisam estar livres. O handler despacha por uma tabela declarativa `resource + httpMethod` → método do controller; rota fora da tabela é erro de configuração (500).
 
 ## Injeção de dependência
 

@@ -15,4 +15,4 @@
 - Headers: `Content-Type: application/json; charset=utf-8`. CORS habilitado nos eventos `http`.
 - API Gateway **REST** (`events: - http:`). Não usar `httpApi`.
 - Serverless-offline sem prefixo de stage para as URLs baterem com o enunciado.
-- Timeouts: funções CRUD 6s; triagem 20s, com timeout do cliente LLM menor que o da Lambda.
+- Timeouts: a função `schedule` tem 20 s porque atende também a triagem (ADR-009); o adapter do LLM limita cada chamada a 5 s e a triagem inteira a 17 s no pior caso (ADR-010), sempre abaixo do timeout da Lambda. Uma função só de CRUD usaria 6 s.

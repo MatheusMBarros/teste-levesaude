@@ -1,6 +1,7 @@
 # ADR-008: Uma função Lambda `schedule` com roteamento por tabela e composition root por módulo
 
-Status: aceito
+Status: aceito; parcialmente substituída pela ADR-009 (`POST /triagem` também entra na função
+`schedule`, em vez de ter função própria)
 
 ## Contexto
 
@@ -13,20 +14,28 @@ precisam, além disso, de estado isolado por teste (`docs/regras/testes.md`).
 ## Decisão
 
 - **Uma função `schedule`** com dois eventos `http` (REST): `GET /agendas` e `POST /agendamento`
-  (D15). `POST /triagem` terá função própria (Fase 5): não compartilha estado mutável.
+  (D15). `POST /triagem` teria função própria; a ADR-009 reviu isso: a triagem também lê a agenda
+  e entrou na mesma função.
 - **Roteamento por tabela declarativa** (`RouteTable`, `src/interfaces/http/router.ts`), com chave
   `"<httpMethod> <resource>"` e valor igual a uma arrow que delega ao método do controller. A chave usa
   `event.resource` (rota declarada), não `event.path`. `createRouter` converte o evento em
   `HttpRequest`, procura a ação e serializa a resposta. Rota fora da tabela é erro de configuração:
   log `error` e 500 genérico. O handler é só a tabela.
-- **Composition root em `src/main/container.ts`**: `createContainer(options?)` monta o grafo
-  (seed → agendas → repositórios → casos de uso → controller) e `container` é criado **no escopo do
-  módulo**. O container Lambda reaproveita o módulo entre invocações, e é isso que mantém o estado.
-  O handler exporta `createScheduleHandler(container)` e
-  `handler = createScheduleHandler(container)`. Os testes de integração chamam
-  `createScheduleHandler(createContainer({ idGenerator, logWriter }))` e ganham estado novo e ids
-  determinísticos sem `jest.mock`.
-- `ContainerOptions` só aceita o que os testes precisam trocar: `idGenerator` (ids previsíveis no 201) e `logWriter` (capturar logs sem poluir a saída). O seed é sempre `DOCTORS_SEED`.
+- **Composition root em `src/main/container.ts`**: `createContainer(options)` monta o grafo
+  (seed → agendas → repositórios → casos de uso → controllers). O módulo **não** cria nenhum
+  container ao ser importado.
+- **Fábrica separada do entrypoint** (revisto na Fase 5):
+  `handlers/schedule-handler.factory.ts` exporta `createScheduleHandler(container)` (a tabela de
+  rotas) e não tem efeito colateral. `handlers/schedule-handler.ts` é só o entrypoint: cria o
+  container padrão **no escopo do módulo**, com `env: process.env`, e exporta
+  `handler = createScheduleHandler(container)`. O container Lambda reaproveita o módulo entre
+  invocações, e é isso que mantém o estado. O `serverless.yml` continua apontando para
+  `schedule-handler.handler`. Os testes de integração importam só a fábrica e chamam
+  `createScheduleHandler(createContainer({ idGenerator, logWriter, env }))`: estado novo, ids
+  determinísticos e ambiente explícito, sem `jest.mock`.
+- `ContainerOptions` só aceita o que os testes precisam trocar: `idGenerator` (ids previsíveis no 201) e `logWriter` (capturar logs sem poluir a saída). O seed é sempre `DOCTORS_SEED`. Na Fase 5
+  entraram `env` (variáveis da triagem, **obrigatório e sem padrão**: só o entrypoint passa
+  `process.env`) e `triageModel` (substitui o modelo inteiro).
 
 ## Alternativas consideradas
 
@@ -45,8 +54,14 @@ precisam, além disso, de estado isolado por teste (`docs/regras/testes.md`).
 - O estado continua por container: duas instâncias quentes da função `schedule` na AWS têm agendas
   diferentes (limitação de D7, a documentar no README). Com um banco, a função pode ser dividida sem
   mudar controllers nem casos de uso.
-- Importar o módulo do handler cria o container padrão. Isso é barato, sem I/O; o log só escreve
-  quando há requisição.
+- Só o entrypoint lê `process.env` e cria o container padrão. Até a Fase 5, a fábrica e o entrypoint
+  eram o mesmo módulo: importar `createScheduleHandler` nos testes criava o container padrão com o
+  ambiente do shell. Um `TRIAGE_PROVIDER` inválido no shell quebrava as suítes, uma
+  `ANTHROPIC_API_KEY` no shell criava um cliente real do SDK e o `warn` de boot da triagem aparecia na
+  saída dos testes. Com a separação, os testes não dependem do shell e não imprimem log.
+- O boot pode escrever `warn` (exceção deliberada ao "log só na requisição", ADR-009): provider
+  `anthropic` sem `ANTHROPIC_API_KEY` (a triagem responderá 503) e provider `fake` (a triagem
+  responderá sem LLM).
 - Rotas inexistentes nunca chegam à Lambda na AWS: o API Gateway responde com as `GatewayResponses`
   (D19). O 500 de rota ausente no roteador cobre só a divergência entre `serverless.yml` e a tabela.
 - O roteador também é a rede de segurança da função: um try/catch final transforma uma ação que

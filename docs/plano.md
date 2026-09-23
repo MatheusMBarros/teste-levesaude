@@ -39,18 +39,21 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [x] Controllers + handlers finos + composition root (`src/main/container.ts`)
 - [x] Log de erros inclui o `code` dos `DomainError` (o `JsonLogger` hoje serializa só `name`, `message` e `stack`)
 - [x] Logger de produção usa um `stdoutWriter` exportado de `src/infrastructure/logger` (acrescenta a quebra de linha), com teste; o container não recebe `process.stdout.write` diretamente (ADR-005)
-- [x] Funções no `serverless.yml`: `schedule` (GET /agendas + POST /agendamento, roteamento por tabela — D15; `triage` entra na Fase 5); `GatewayResponses` 4XX/5XX e CORS em todas as respostas (D19)
+- [x] Funções no `serverless.yml`: `schedule` (GET /agendas + POST /agendamento, roteamento por tabela — D15; `triage` entra na Fase 5 (revisto pela ADR-009: /triagem entra na função schedule)); `GatewayResponses` 4XX/5XX e CORS em todas as respostas (D19)
 - [x] `serverless package` gera o artefato sem erro (prova do deploy, sem executá-lo)
 - [x] Testes de integração dos handlers (evento API Gateway fabricado)
 
 ## Fase 5 — Triagem com IA (diferencial)
 
-- [ ] Porta `TriageModel` + `SuggestSpecialtyUseCase` (cruza com agenda)
-- [ ] Prompt versionado (`triage.prompt.v1.ts`) com saída estruturada (tool use forçado)
-- [ ] `AnthropicTriageModel` com timeout, retentativa, validação Zod da saída
-- [ ] `FakeTriageModel` (determinístico), ativado por `TRIAGE_PROVIDER=fake` (D17)
-- [ ] Erros tipados: 502/503/504
-- [ ] Testes unit + integração
+- [x] Porta `TriageModel` + `SuggestSpecialtyUseCase` (cruza com agenda)
+- [x] Prompt versionado (`triage.prompt.v1.ts`) com saída estruturada (tool use forçado)
+- [x] `AnthropicTriageModel` com timeout, retentativa, validação Zod da saída
+- [x] `FakeTriageModel` (determinístico), ativado por `TRIAGE_PROVIDER=fake` (D17)
+- [x] Erros tipados: 502/503/504
+- [x] Testes unit + integração
+- [x] `POST /triagem` na tabela da função `schedule` + `timeout: 20` (ADR-009)
+- [x] Env vars no `serverless.yml`/`.env.example` + validação Zod no composition root; `serverless package` sem `ANTHROPIC_API_KEY`
+- [ ] Validação real com a API (latência medida; constantes de timeout/tentativas ajustadas — ADR-010)
 
 ## Fase 6 — E2E
 
@@ -64,6 +67,6 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [ ] `requests.http` ou coleção de exemplos cURL
 - [ ] `GatewayResponse` para rota inexistente com 404 (`MISSING_AUTHENTICATION_TOKEN`/`RESOURCE_NOT_FOUND`: a AWS REST devolve 403 por padrão) e nota no README de que o serverless-offline ignora `GatewayResponses` e devolve o 404 dele, fora do formato do contrato
 - [ ] Arredondar `durationMs` no `@LogRequest`
-- [ ] `timeout: 6` repetido na função `schedule` (já é o `provider.timeout`): remover ou comentar que é explícito de propósito
+- [ ] Comentar no `serverless.yml` por que `schedule` tem 20 s e o `provider.timeout` 6 s fica como padrão para funções futuras (as CRUD, quando cada endpoint tiver função própria — `docs/regras/api.md`)
 - [ ] Teste de rota desconhecida conferir `method` e `resource` no log
 - [ ] Revisão final como avaliador

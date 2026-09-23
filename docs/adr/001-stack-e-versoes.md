@@ -34,10 +34,11 @@ cruzadas, o que exige escolher uma combinação compatível e justificar cada ve
 | prettier               | 3.9.9    | devDependencies |
 | @types/aws-lambda      | 8.10.163 | devDependencies |
 | zod                    | 4.6.5    | dependencies    |
+| @anthropic-ai/sdk      | 0.128.0  | dependencies    |
 
 Nenhuma dependência de runtime na Fase 1. `zod` e `@types/aws-lambda` (exigido por
-`docs/regras/testes.md`) entraram na Fase 4, junto com a camada HTTP; `@anthropic-ai/sdk` entra
-como `dependencies` na Fase 5, com versão verificada naquele momento.
+`docs/regras/testes.md`) entraram na Fase 4, junto com a camada HTTP; `@anthropic-ai/sdk` entrou
+como `dependencies` na Fase 5 (0.128.0, versão exata).
 
 ### Matriz de compatibilidade verificada
 
@@ -138,6 +139,12 @@ define `"type": "module"` (código e bundles em CJS); a extensão `.mjs` basta p
   de depreciação. Antes de qualquer deploy, verifique o status atual do runtime na documentação da
   AWS (pode haver bloqueio de criação/atualização de funções). Caminho de evolução: migrar para
   Serverless v4 (ou SAM/CDK) e `nodejs22.x`; o código não depende de nada específico do Node 20.
+- **`@anthropic-ai/sdk` 0.128.0 declara suporte a "Node.js 20 LTS or later (non-EOL) versions"**
+  (README do pacote; sem campo `engines`). Com o Node 20 em fim de vida, o runtime `nodejs20.x`
+  está fora da faixa suportada pelo SDK. Hoje funciona (usa `fetch`, `Headers` e `AbortController`
+  nativos, presentes no Node 20, e o bundle foi exercitado com `node` local), mas atualizações
+  futuras do SDK podem exigir Node 22. É mais um motivo para o caminho de evolução acima. O SDK
+  entra no bundle da função (cerca de 1,2 MB zipado com as demais dependências).
 - Serverless v3 não recebe mais evolução do fornecedor; é uma escolha consciente para
   executabilidade local sem conta. Qualquer atualização futura começa pela ferramenta de deploy.
 - O serverless-offline executa com o Node do host (ex.: Node 24 na máquina de desenvolvimento).
