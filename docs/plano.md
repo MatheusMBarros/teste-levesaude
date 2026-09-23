@@ -16,13 +16,13 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 
 ## Fase 2 — Domínio e aplicação (TDD)
 
-- [ ] `Result<T, E>` + `assertNever` (a Fase 1 já criou `ok`/`err` como smoke test do pipeline)
-- [ ] Trocar `npm test` por `npm run test:coverage` no script `check` (thresholds de 90% passam a valer — ADR-001)
-- [ ] Erros de domínio tipados (`DomainError` abstrato com `code` literal)
-- [ ] Entidades/value objects: `Doctor`, `Appointment`, `SlotDateTime` + agregado `DoctorSchedule` (regra 422/409, D20)
-- [ ] Portas: `ScheduleRepository`, `AppointmentRepository`, `IdGenerator`, `Logger`
-- [ ] `ListSchedulesUseCase` + testes
-- [ ] `CreateAppointmentUseCase` + testes (sucesso, 404, 422, 409, horário some da agenda)
+- [x] `Result<T, E>` + `assertNever` (a Fase 1 já criou `ok`/`err` como smoke test do pipeline)
+- [x] Trocar `npm test` por `npm run test:coverage` no script `check` (thresholds de 90% passam a valer — ADR-001)
+- [x] Erros de domínio tipados (`DomainError` abstrato com `code` literal)
+- [x] Entidades/value objects: `Doctor`, `Appointment`, `SlotDateTime` + agregado `DoctorSchedule` (regra 422/409, D20)
+- [x] Portas: `ScheduleRepository`, `AppointmentRepository`, `IdGenerator`, `Logger`
+- [x] `ListSchedulesUseCase` + testes
+- [x] `CreateAppointmentUseCase` + testes (sucesso, 404, 422, 409, horário some da agenda)
 
 ## Fase 3 — Infraestrutura
 

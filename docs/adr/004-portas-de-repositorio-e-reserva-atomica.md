@@ -41,7 +41,9 @@ regras pedem portas pequenas e nenhum código morto.
 - **`Appointment` guarda `doctorId` + `doctorName`** (snapshot no momento da reserva), em vez de
   uma referência ao `Doctor` inteiro.
 - **Entidades como `interface` readonly** (`docs/regras/typescript.md`). Hoje elas não têm
-  comportamento próprio que justifique classe.
+  comportamento próprio que justifique classe. `Doctor` é a **projeção de leitura** do agregado
+  `DoctorSchedule` (via `toDoctor()`): o agregado guarda ofertados e reservados; `Doctor` expõe só o
+  que os casos de uso e a API leem (`availableSlots`).
 
 ## Alternativas consideradas
 

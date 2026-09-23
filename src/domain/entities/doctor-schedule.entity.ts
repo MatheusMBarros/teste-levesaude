@@ -1,6 +1,7 @@
 import type { Result } from '../../shared/result';
-import type { SlotNotOfferedError } from '../errors/slot-not-offered.error';
-import type { SlotUnavailableError } from '../errors/slot-unavailable.error';
+import { err, ok } from '../../shared/result';
+import { SlotNotOfferedError } from '../errors/slot-not-offered.error';
+import { SlotUnavailableError } from '../errors/slot-unavailable.error';
 import type { SlotDateTime } from '../value-objects/slot-date-time.value-object';
 import type { Doctor } from './doctor.entity';
 
@@ -36,13 +37,30 @@ export class DoctorSchedule {
   }
 
   reserve(slot: SlotDateTime): Result<DoctorSchedule, ReserveError> {
-    // eslint-disable-next-line @typescript-eslint/no-meaningless-void-operator -- stub da etapa de contratos; removido na implementação (TDD)
-    void [slot, this.reservedSlots];
-    throw new Error('Not implemented');
+    if (!this.offers(slot)) {
+      return err(new SlotNotOfferedError(this.doctorId, slot));
+    }
+    if (this.isReserved(slot)) {
+      return err(new SlotUnavailableError(this.doctorId, slot));
+    }
+    return ok(new DoctorSchedule(this.props, [...this.reservedSlots, slot]));
   }
 
   /** Visão de leitura: `availableSlots` = ofertados − reservados, na ordem do seed. */
   toDoctor(): Doctor {
-    throw new Error('Not implemented');
+    return {
+      id: this.props.doctorId,
+      name: this.props.doctorName,
+      specialty: this.props.specialty,
+      availableSlots: this.props.offeredSlots.filter((offered) => !this.isReserved(offered)),
+    };
+  }
+
+  private offers(slot: SlotDateTime): boolean {
+    return this.props.offeredSlots.some((offered) => offered.equals(slot));
+  }
+
+  private isReserved(slot: SlotDateTime): boolean {
+    return this.reservedSlots.some((reserved) => reserved.equals(slot));
   }
 }

@@ -33,8 +33,8 @@ const config = {
   ],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts'],
   coverageThreshold: {
-    './src/domain/': { lines: 90, branches: 90 },
-    './src/application/': { lines: 90, branches: 90 },
+    './src/domain/': { lines: 90, branches: 90, functions: 90, statements: 90 },
+    './src/application/': { lines: 90, branches: 90, functions: 90, statements: 90 },
   },
 };
 

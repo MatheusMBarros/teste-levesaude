@@ -10,9 +10,6 @@ export class ListSchedulesUseCase implements UseCase<void, ReadonlyArray<Doctor>
   constructor(private readonly scheduleRepository: ScheduleRepository) {}
 
   execute(): Promise<ReadonlyArray<Doctor>> {
-    // Stub da etapa de contratos (Fase 2); implementado pelo dev-backend via TDD.
-    // eslint-disable-next-line @typescript-eslint/no-meaningless-void-operator -- stub da etapa de contratos; removido na implementação (TDD)
-    void this.scheduleRepository;
-    throw new Error('Not implemented');
+    return this.scheduleRepository.list();
   }
 }
