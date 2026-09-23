@@ -29,8 +29,10 @@ o fake já usado nos testes de caso de uso e como testar o logger sem `jest.mock
   (localizar, 404, substituir), porque a regra 422/409 já está no agregado nos dois casos.
 - **Logger com writer injetado.** `JsonLogger` recebe `write: (line: string) => void` e um relógio
   `now: () => Date`. O logger entrega a linha **sem** `\n`: o terminador é responsabilidade do
-  writer. Em produção, o composition root passa `(line) => process.stdout.write(`${line}\n`)` — arrow
-  function, porque `process.stdout.write` solto perde o `this` — gerando uma linha JSON por evento,
+  writer. Em produção, o composition root usa um `stdoutWriter` exportado de
+  `src/infrastructure/logger` (Fase 4) que acrescenta o `\n` e chama `process.stdout.write` dentro de
+  uma arrow function (solto, ele perde o `this`); o container nunca recebe `process.stdout.write`
+  diretamente. Assim sai uma linha JSON por evento,
   que o CloudWatch indexa; em teste, uma função que acumula linhas num array. Falhas do próprio
   writer não são capturadas pelo logger (o writer de produção não lança). Os campos
   fixos (`level`, `timestamp`, `message`) prevalecem sobre chaves homônimas do contexto. Valores

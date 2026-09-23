@@ -12,7 +12,10 @@
 - Sem `export default`. Um conceito principal por arquivo.
 - Decorators: padrão TS 5 (sem `experimentalDecorators`), tipados com `ClassMethodDecoratorContext`.
 - Nomenclatura:
-  - arquivos kebab-case com sufixo de papel: `.use-case.ts`, `.repository.ts`, `.handler.ts`, `.controller.ts`, `.error.ts`, `.schema.ts`, `.presenter.ts`, `.spec.ts`
-  - identificadores **sempre em inglês**, inclusive termos de domínio (`Doctor`, `Appointment`, `availableSlots`, `CreateAppointmentUseCase`) — ver glossário em `docs/requisitos.md` (D16)
-  - português apenas no contrato HTTP (chaves snake_case do enunciado), mensagens ao usuário e descrições de testes
+  - arquivos kebab-case com sufixo de papel: `.use-case.ts`, `.repository.ts`, `.handler.ts`, `.controller.ts`, `.error.ts`, `.schema.ts`, `.presenter.ts`, `.value-object.ts`, `.entity.ts`, `.port.ts`, `.generator.ts`, `.logger.ts`, `.factory.ts`, `.seed.ts`, `.spec.ts`
+- Idioma (ADR-006):
+  - identificadores **sempre em inglês** (classes, tipos, funções, variáveis, chaves de objetos internos, arquivos, env vars), inclusive termos de domínio (`Doctor`, `Appointment`, `availableSlots`, `CreateAppointmentUseCase`) — ver glossário em `docs/requisitos.md` (D16)
+  - o contrato HTTP é **português em snake_case**, literal do enunciado (`medico_id`, `horarios_disponiveis`); a tradução contrato ↔ modelo interno camelCase acontece só na camada HTTP — presenters na saída, schemas/controllers na entrada (D11). Domínio e aplicação nunca usam chaves do contrato
+  - também em português: mensagens ao usuário, valores de domínio exibidos no contrato (ex.: `SPECIALTIES`), descrições de testes, comentários e documentação
+  - mensagens de exceções internas (nunca expostas ao cliente) em inglês
 - Sem código morto, sem `console.log` (use a porta `Logger`), sem TODO sem issue/explicação.

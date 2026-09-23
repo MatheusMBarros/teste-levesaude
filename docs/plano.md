@@ -37,6 +37,8 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [ ] Mapeamento `DomainError → HttpResponse` exaustivo
 - [ ] Presenters snake_case
 - [ ] Controllers + handlers finos + composition root (`src/main/container.ts`)
+- [ ] Log de erros inclui o `code` dos `DomainError` (o `JsonLogger` hoje serializa só `name`, `message` e `stack`)
+- [ ] Logger de produção usa um `stdoutWriter` exportado de `src/infrastructure/logger` (acrescenta a quebra de linha), com teste; o container não recebe `process.stdout.write` diretamente (ADR-005)
 - [ ] Funções no `serverless.yml`: `schedule` (GET /agendas + POST /agendamento, roteamento por tabela — D15) e `triage`; `GatewayResponses` 4XX/5XX e CORS em todas as respostas (D19)
 - [ ] `serverless package` gera o artefato sem erro (prova do deploy, sem executá-lo)
 - [ ] Testes de integração dos handlers (evento API Gateway fabricado)
