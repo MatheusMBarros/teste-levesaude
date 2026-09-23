@@ -163,6 +163,7 @@ describe('createAppointmentSchema', () => {
       ['número', 123],
       ['null', null],
       ['objeto', { nome: 'Carlos' }],
+      ['lista com texto curto (sem o problema de tamanho junto)', ['ab']],
     ])('rejeita %s com "deve ser um texto"', (_label, paciente) => {
       expect(issuesOf(anAppointmentPayload({ paciente }))).toEqual([
         { path: 'agendamento.paciente', message: 'deve ser um texto' },

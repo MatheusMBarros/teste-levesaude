@@ -31,15 +31,19 @@ export const createAppointmentSchema = z.object(
           .number({ error: requiredOr('deve ser um número inteiro') })
           .int({ error: 'deve ser um número inteiro' })
           .positive({ error: 'deve ser maior que zero' }),
-        paciente: z
-          .string({ error: requiredOr('deve ser um texto') })
-          .trim()
-          .min(PATIENT_MIN_LENGTH, {
-            error: `deve ter pelo menos ${String(PATIENT_MIN_LENGTH)} caracteres`,
-          })
-          .max(PATIENT_MAX_LENGTH, {
-            error: `deve ter no máximo ${String(PATIENT_MAX_LENGTH)} caracteres`,
-          }),
+        // `pipe`: o Zod 4 roda `min`/`max` mesmo após o erro de tipo quando a entrada tem `length`
+        // (ex.: uma lista), o que geraria um segundo problema enganoso no 400.
+        paciente: z.string({ error: requiredOr('deve ser um texto') }).pipe(
+          z
+            .string()
+            .trim()
+            .min(PATIENT_MIN_LENGTH, {
+              error: `deve ter pelo menos ${String(PATIENT_MIN_LENGTH)} caracteres`,
+            })
+            .max(PATIENT_MAX_LENGTH, {
+              error: `deve ter no máximo ${String(PATIENT_MAX_LENGTH)} caracteres`,
+            }),
+        ),
         data_horario: slotDateTime,
       },
       { error: requiredOr('deve ser um objeto') },

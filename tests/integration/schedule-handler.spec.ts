@@ -295,6 +295,17 @@ describe('schedule handler (GET /agendas + POST /agendamento)', () => {
       );
     });
 
+    it('responde 400 com um único problema quando paciente é uma lista de texto curto', async () => {
+      const { handler } = makeSut();
+
+      const result = await postAppointment(handler, anAppointmentPayload({ paciente: ['ab'] }));
+
+      expect(result.statusCode).toBe(400);
+      expect(parseJsonBody(result)).toEqual(
+        invalidPayload('agendamento.paciente', 'deve ser um texto'),
+      );
+    });
+
     it('não reserva o horário quando o payload é inválido', async () => {
       const { handler } = makeSut();
       await postAppointment(handler, anAppointmentPayload({ paciente: '' }));
