@@ -23,6 +23,8 @@ export default defineConfig(
       '@typescript-eslint/explicit-module-boundary-types': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
       'no-console': 'error',
+      // docs/regras/typescript.md exige `ReadonlyArray<T>`; o padrão do stylistic ('array') o proibiria.
+      '@typescript-eslint/array-type': ['error', { default: 'array', readonly: 'generic' }],
     },
   },
   {

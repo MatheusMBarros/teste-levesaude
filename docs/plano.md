@@ -19,7 +19,7 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [ ] `Result<T, E>` + `assertNever` (a Fase 1 já criou `ok`/`err` como smoke test do pipeline)
 - [ ] Trocar `npm test` por `npm run test:coverage` no script `check` (thresholds de 90% passam a valer — ADR-001)
 - [ ] Erros de domínio tipados (`DomainError` abstrato com `code` literal)
-- [ ] Entidades/value objects: `Doctor`, `Appointment`, `SlotDateTime`
+- [ ] Entidades/value objects: `Doctor`, `Appointment`, `SlotDateTime` + agregado `DoctorSchedule` (regra 422/409, D20)
 - [ ] Portas: `ScheduleRepository`, `AppointmentRepository`, `IdGenerator`, `Logger`
 - [ ] `ListSchedulesUseCase` + testes
 - [ ] `CreateAppointmentUseCase` + testes (sucesso, 404, 422, 409, horário some da agenda)
