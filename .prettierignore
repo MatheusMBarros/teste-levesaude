@@ -1,0 +1,7 @@
+node_modules/
+.serverless/
+.esbuild/
+coverage/
+dist/
+package-lock.json
+docs/teste-tecnico.pdf

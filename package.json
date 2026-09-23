@@ -1,0 +1,40 @@
+{
+  "name": "levesaude-agendamento",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API serverless de agendamento médico — teste técnico Leve Saúde",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "serverless offline start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "jest --selectProjects unit integration",
+    "test:unit": "jest --selectProjects unit",
+    "test:integration": "jest --selectProjects integration --passWithNoTests",
+    "test:e2e": "jest --selectProjects e2e --passWithNoTests",
+    "test:coverage": "jest --selectProjects unit integration --coverage",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/jest": "30.0.0",
+    "@types/node": "20.19.43",
+    "esbuild": "0.28.2",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "jest": "30.5.2",
+    "prettier": "3.9.9",
+    "serverless": "3.40.0",
+    "serverless-esbuild": "1.57.2",
+    "serverless-offline": "13.10.1",
+    "ts-jest": "29.4.13",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1"
+  }
+}
