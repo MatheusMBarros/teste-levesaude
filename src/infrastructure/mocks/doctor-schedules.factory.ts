@@ -2,9 +2,6 @@ import { DoctorSchedule } from '../../domain/entities/doctor-schedule.entity';
 import { SlotDateTime } from '../../domain/value-objects/slot-date-time.value-object';
 import type { DoctorSeed } from './doctors.seed';
 
-// Seed inconsistente (data inválida, id ou horário repetido) é bug de dados, não erro de negócio:
-// falha na inicialização (ADR-004). Id repetido deixaria o segundo médico inalcançável no repositório.
-
 function parseSlot(value: string, doctorId: number): SlotDateTime {
   const parsed = SlotDateTime.create(value);
   if (!parsed.ok) {
@@ -43,6 +40,11 @@ function toDoctorSchedule(seed: DoctorSeed): DoctorSchedule {
   });
 }
 
+/**
+ * Converte o seed em agregados. Seed inconsistente (data inválida, id ou horário repetido) é bug de
+ * dados, não erro de negócio: lança e falha na inicialização (ADR-004). Id repetido deixaria o
+ * segundo médico inalcançável no repositório.
+ */
 export function createDoctorSchedules(
   seed: ReadonlyArray<DoctorSeed>,
 ): ReadonlyArray<DoctorSchedule> {

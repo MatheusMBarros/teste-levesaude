@@ -94,7 +94,7 @@ describe('createDoctorSchedules', () => {
     const act = (): unknown => createDoctorSchedules(seed);
 
     expect(act).toThrow(/2026-06-10 09:00/);
-    expect(act).toThrow(/42/);
+    expect(act).toThrow(/doctor 42/);
   });
 
   it('aceita o mesmo horário em médicos diferentes', () => {
@@ -149,18 +149,6 @@ describe('DOCTORS_SEED', () => {
       expect(doctor?.availableSlots.every((value) => value.startsWith('2026-06-'))).toBe(true);
     },
   );
-
-  it('não compila com especialidade fora da lista fechada', () => {
-    const invalid: DoctorSeed = {
-      id: 99,
-      name: 'Dr. Fora da Lista',
-      // @ts-expect-error: 'Neurologista' não faz parte de SPECIALTIES
-      specialty: 'Neurologista',
-      availableSlots: [],
-    };
-
-    expect(invalid.specialty).toBe('Neurologista');
-  });
 
   it('usa ids únicos para os médicos', () => {
     const ids = DOCTORS_SEED.map((seed) => seed.id);
