@@ -32,16 +32,16 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 
 ## Fase 4 — Camada HTTP + Serverless
 
-- [ ] Schemas Zod (tipos via `z.infer`) com mensagens em PT
-- [ ] Decorators: `@ValidateBody`, `@HandleHttpErrors`, `@LogRequest` (desenho tipado sem `as`: decorator padrão não muda a assinatura do método — ex. `HttpRequest<TBody>`)
-- [ ] Mapeamento `DomainError → HttpResponse` exaustivo
-- [ ] Presenters snake_case
-- [ ] Controllers + handlers finos + composition root (`src/main/container.ts`)
-- [ ] Log de erros inclui o `code` dos `DomainError` (o `JsonLogger` hoje serializa só `name`, `message` e `stack`)
-- [ ] Logger de produção usa um `stdoutWriter` exportado de `src/infrastructure/logger` (acrescenta a quebra de linha), com teste; o container não recebe `process.stdout.write` diretamente (ADR-005)
-- [ ] Funções no `serverless.yml`: `schedule` (GET /agendas + POST /agendamento, roteamento por tabela — D15) e `triage`; `GatewayResponses` 4XX/5XX e CORS em todas as respostas (D19)
-- [ ] `serverless package` gera o artefato sem erro (prova do deploy, sem executá-lo)
-- [ ] Testes de integração dos handlers (evento API Gateway fabricado)
+- [x] Schemas Zod (tipos via `z.infer`) com mensagens em PT
+- [x] Decorators: `@ValidateBody`, `@HandleHttpErrors`, `@LogRequest` (desenho tipado sem `as`: decorator padrão não muda a assinatura do método, então o método recebe o `HttpRequest` bruto e lê o corpo validado com `ValidatedBody.of(request)` — ADR-007)
+- [x] Mapeamento `DomainError → HttpResponse` exaustivo
+- [x] Presenters snake_case
+- [x] Controllers + handlers finos + composition root (`src/main/container.ts`)
+- [x] Log de erros inclui o `code` dos `DomainError` (o `JsonLogger` hoje serializa só `name`, `message` e `stack`)
+- [x] Logger de produção usa um `stdoutWriter` exportado de `src/infrastructure/logger` (acrescenta a quebra de linha), com teste; o container não recebe `process.stdout.write` diretamente (ADR-005)
+- [x] Funções no `serverless.yml`: `schedule` (GET /agendas + POST /agendamento, roteamento por tabela — D15; `triage` entra na Fase 5); `GatewayResponses` 4XX/5XX e CORS em todas as respostas (D19)
+- [x] `serverless package` gera o artefato sem erro (prova do deploy, sem executá-lo)
+- [x] Testes de integração dos handlers (evento API Gateway fabricado)
 
 ## Fase 5 — Triagem com IA (diferencial)
 
@@ -59,6 +59,7 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 ## Fase 7 — Documentação e entrega
 
 - [ ] README completo
+- [ ] README com a seção "Por que uma Lambda para duas rotas": restrição do estado em memória (D6, D7, D15, ADR-008) e a alternativa em produção (uma função por endpoint + DynamoDB com `ConditionExpression` para a reserva atômica)
 - [ ] ADRs revisados
 - [ ] `requests.http` ou coleção de exemplos cURL
 - [ ] Revisão final como avaliador
