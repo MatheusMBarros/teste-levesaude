@@ -2,15 +2,10 @@ import { z } from 'zod';
 
 import { SlotDateTime } from '../../../domain/value-objects/slot-date-time.value-object';
 import { ValidatedBody } from '../decorators/validate-body.decorator';
+import { requiredOr } from './common.schema';
 
-const REQUIRED = 'é obrigatório';
 const PATIENT_MIN_LENGTH = 3;
 const PATIENT_MAX_LENGTH = 120;
-
-// Só campo ausente (`undefined`) é "obrigatório"; `null` é valor presente com tipo errado.
-function requiredOr(typeProblem: string): (issue: { readonly input?: unknown }) => string {
-  return (issue) => (issue.input === undefined ? REQUIRED : typeProblem);
-}
 
 const slotDateTime = z
   .string({ error: requiredOr('deve ser um texto') })

@@ -1,7 +1,7 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 
 import type { IdGenerator } from '../../src/application/ports/id-generator.port';
-import { createScheduleHandler } from '../../src/interfaces/http/handlers/schedule-handler';
+import { createScheduleHandler } from '../../src/interfaces/http/handlers/schedule-handler.factory';
 import { createContainer } from '../../src/main/container';
 import { aJsonPostEvent, anApiGatewayEvent } from '../helpers/api-gateway-event';
 import { anAppointmentPayload } from '../helpers/builders/appointment-payload';
@@ -103,7 +103,9 @@ function makeSut(idGenerator: IdGenerator = new SequentialIdGenerator()): {
   logs: LogCapture;
 } {
   const logs = captureLogs();
-  const handler = createScheduleHandler(createContainer({ idGenerator, logWriter: logs.write }));
+  const handler = createScheduleHandler(
+    createContainer({ idGenerator, logWriter: logs.write, env: { TRIAGE_PROVIDER: 'fake' } }),
+  );
   return { handler, logs };
 }
 
@@ -434,7 +436,9 @@ describe('schedule handler (GET /agendas + POST /agendamento)', () => {
   describe('container padrão', () => {
     it('gera um UUID v4 como id do agendamento quando nenhum IdGenerator é injetado', async () => {
       const logs = captureLogs();
-      const handler = createScheduleHandler(createContainer({ logWriter: logs.write }));
+      const handler = createScheduleHandler(
+        createContainer({ logWriter: logs.write, env: { TRIAGE_PROVIDER: 'fake' } }),
+      );
 
       const anyUuidV4: unknown = expect.stringMatching(UUID_V4);
 

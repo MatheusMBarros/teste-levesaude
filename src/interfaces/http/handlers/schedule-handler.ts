@@ -1,20 +1,11 @@
-import type { Container } from '../../../main/container';
-import { container } from '../../../main/container';
-import type { ApiGatewayHandler } from '../router';
-import { createRouter } from '../router';
+import { createContainer } from '../../../main/container';
+import { createScheduleHandler } from './schedule-handler.factory';
 
-/** Função `schedule`: as duas rotas compartilham o estado em memória do container (D15, ADR-008). */
-export function createScheduleHandler({
-  scheduleController,
-  logger,
-}: Container): ApiGatewayHandler {
-  return createRouter(
-    {
-      'GET /agendas': (request) => scheduleController.listSchedules(request),
-      'POST /agendamento': (request) => scheduleController.createAppointment(request),
-    },
-    logger,
-  );
-}
+/*
+ * Entrypoint Lambda da função `schedule` (`serverless.yml`: `schedule-handler.handler`). O container
+ * é criado no escopo do módulo, uma vez por container Lambda: é isso que mantém o estado em memória
+ * entre invocações (D7). Só este módulo lê `process.env`; os testes importam a fábrica.
+ */
+const container = createContainer({ env: process.env });
 
 export const handler = createScheduleHandler(container);

@@ -1,4 +1,7 @@
 import { slot } from '../../../../tests/helpers/builders/slot';
+import { TriageInvalidResponseError } from '../../../application/errors/triage-invalid-response.error';
+import { TriageTimeoutError } from '../../../application/errors/triage-timeout.error';
+import { TriageUnavailableError } from '../../../application/errors/triage-unavailable.error';
 import { DoctorNotFoundError } from '../../../domain/errors/doctor-not-found.error';
 import { SlotNotOfferedError } from '../../../domain/errors/slot-not-offered.error';
 import { SlotUnavailableError } from '../../../domain/errors/slot-unavailable.error';
@@ -34,6 +37,36 @@ describe('domainErrorResponse', () => {
         mensagem: 'O horário solicitado não está mais disponível para este médico.',
       },
     ],
+    [
+      'TriageUnavailableError em 503',
+      new TriageUnavailableError('missing_api_key'),
+      503,
+      {
+        erro: 'Triagem indisponível',
+        mensagem:
+          'O serviço de triagem está temporariamente indisponível. Tente novamente mais tarde. Em caso de emergência, ligue 192.',
+      },
+    ],
+    [
+      'TriageInvalidResponseError em 502',
+      new TriageInvalidResponseError(2),
+      502,
+      {
+        erro: 'Resposta inválida da triagem',
+        mensagem:
+          'Não foi possível interpretar a sugestão da triagem. Tente novamente. Em caso de emergência, ligue 192.',
+      },
+    ],
+    [
+      'TriageTimeoutError em 504',
+      new TriageTimeoutError(5_000),
+      504,
+      {
+        erro: 'Tempo esgotado na triagem',
+        mensagem:
+          'A triagem demorou mais que o esperado. Tente novamente. Em caso de emergência, ligue 192.',
+      },
+    ],
   ])('mapeia %s', (_label, error, statusCode, body) => {
     const response = domainErrorResponse(error);
 
@@ -47,4 +80,14 @@ describe('domainErrorResponse', () => {
 
     expect(JSON.stringify(response)).not.toContain(error.message);
   });
+
+  it.each(['missing_api_key', 'provider_unavailable', 'provider_rejected'] as const)(
+    'responde o mesmo 503 para TriageUnavailableError com reason %s, sem expor o motivo',
+    (reason) => {
+      const response = domainErrorResponse(new TriageUnavailableError(reason));
+
+      expect(response.statusCode).toBe(503);
+      expect(JSON.stringify(response)).not.toContain(reason);
+    },
+  );
 });

@@ -12,6 +12,12 @@ provider:
   memorySize: 256
   environment:
     NODE_OPTIONS: --enable-source-maps
+    # Triagem (D17, ADR-010/011). Padrão `anthropic`: sem chave, POST /triagem responde 503 e as
+    # outras rotas seguem funcionando. `fake` roda sem chave (testes, e2e, execução local).
+    TRIAGE_PROVIDER: ${env:TRIAGE_PROVIDER, 'anthropic'}
+    TRIAGE_MODEL: ${env:TRIAGE_MODEL, 'claude-sonnet-5'}
+    # Em produção a chave viria do SSM Parameter Store/Secrets Manager, não de variável em texto (ADR-009).
+    ANTHROPIC_API_KEY: ${env:ANTHROPIC_API_KEY, ''}
 
 package:
   individually: true
@@ -35,12 +41,15 @@ custom:
     httpPort: 3000
 
 functions:
-  # GET /agendas e POST /agendamento na MESMA função de propósito (D15, ADR-008): Lambdas distintas não
-  # compartilham memória, e o horário reservado precisa sumir do GET (D6). Em produção seria uma função
-  # por endpoint com estado externo (ex.: DynamoDB).
+  # GET /agendas, POST /agendamento e POST /triagem na MESMA função de propósito (D15, ADR-008, ADR-009):
+  # Lambdas distintas não compartilham memória, o horário reservado precisa sumir do GET (D6) e a triagem
+  # precisa sugerir horários que ainda estão livres. Em produção seria uma função por endpoint com estado
+  # externo (ex.: DynamoDB).
   schedule:
     handler: src/interfaces/http/handlers/schedule-handler.handler
-    timeout: 6
+    # 20 s por causa da triagem (docs/regras/api.md): o adapter do LLM gasta no máximo 17 s no pior caso
+    # (3 tentativas de 5 s + pausas, ADR-010). Custo aceito: /agendas e /agendamento herdam o mesmo teto.
+    timeout: 20
     events:
       - http:
           path: agendas
@@ -48,6 +57,10 @@ functions:
           cors: true
       - http:
           path: agendamento
+          method: post
+          cors: true
+      - http:
+          path: triagem
           method: post
           cors: true
 
