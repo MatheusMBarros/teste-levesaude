@@ -75,6 +75,39 @@ describe('createDoctorSchedules', () => {
     expect(act).toThrow(/42/);
   });
 
+  it('lança erro identificando o médico quando o seed repete o id de um médico', () => {
+    const seed = [aSeed({ id: 7 }), aSeed({ id: 8 }), aSeed({ id: 7 })];
+
+    const act = (): unknown => createDoctorSchedules(seed);
+
+    expect(act).toThrow(/doctor id 7/);
+  });
+
+  it('lança erro identificando o horário e o médico quando o seed repete um horário do mesmo médico', () => {
+    const seed = [
+      aSeed({
+        id: 42,
+        availableSlots: ['2026-06-10 09:00', '2026-06-10 10:00', '2026-06-10 09:00'],
+      }),
+    ];
+
+    const act = (): unknown => createDoctorSchedules(seed);
+
+    expect(act).toThrow(/2026-06-10 09:00/);
+    expect(act).toThrow(/42/);
+  });
+
+  it('aceita o mesmo horário em médicos diferentes', () => {
+    const seed = [
+      aSeed({ id: 1, availableSlots: ['2026-06-10 09:00'] }),
+      aSeed({ id: 2, availableSlots: ['2026-06-10 09:00'] }),
+    ];
+
+    const act = (): unknown => createDoctorSchedules(seed);
+
+    expect(act).not.toThrow();
+  });
+
   it('não muta o seed recebido', () => {
     const seed = [aSeed({ id: 1 }), aSeed({ id: 2 })];
     const snapshot = structuredClone(seed);
