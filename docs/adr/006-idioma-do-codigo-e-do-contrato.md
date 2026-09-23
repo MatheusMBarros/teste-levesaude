@@ -24,6 +24,7 @@ no código.
 
 - O domínio fica legível para qualquer desenvolvedor e desacoplado do formato do contrato: mudar
   uma chave do JSON afeta só presenters/schemas.
-- Os valores de `SPECIALTIES` são dados, não identificadores: ficam em português porque são o texto
-  do contrato; as chaves do objeto seguem em inglês.
+- Os itens de `SPECIALTIES` são dados, não identificadores: ficam em português porque são o texto
+  do contrato. A lista é uma tupla `as const` (sem chaves, portanto sem identificadores a traduzir);
+  o nome da constante e o tipo derivado `Specialty` seguem em inglês.
 - Convivem dois idiomas no repositório; a regra acima diz qual usar em cada lugar.
