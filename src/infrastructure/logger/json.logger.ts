@@ -4,12 +4,32 @@ export type LogWriter = (line: string) => void;
 
 type LogLevel = 'info' | 'warn' | 'error';
 
+/** Destino mínimo de escrita, compatível com `process.stdout`. */
+export interface TextOutputStream {
+  write(chunk: string): unknown;
+}
+
+/**
+ * `LogWriter` que termina cada linha com `\n`. Chama `stream.write` a cada escrita, em vez de
+ * guardar a referência do método: mantém o `this` do stream e respeita substituições posteriores.
+ */
+export function createLineWriter(stream: TextOutputStream): LogWriter {
+  return (line) => {
+    stream.write(`${line}\n`);
+  };
+}
+
+export const stdoutWriter: LogWriter = createLineWriter(process.stdout);
+
+// `code` identifica o DomainError (ex.: lançado por engano) sem depender do texto da mensagem.
+function serializeError(error: Error): Readonly<Record<string, unknown>> {
+  const base = { name: error.name, message: error.message, stack: error.stack };
+  return 'code' in error && typeof error.code === 'string' ? { ...base, code: error.code } : base;
+}
+
 // JSON.stringify serializa Error como `{}`; sem isso a causa de um 500 some do log.
 function serializeErrors(_key: string, value: unknown): unknown {
-  if (value instanceof Error) {
-    return { name: value.name, message: value.message, stack: value.stack };
-  }
-  return value;
+  return value instanceof Error ? serializeError(value) : value;
 }
 
 /** Uma linha JSON por evento (formato que o CloudWatch indexa). Ver ADR-005. */

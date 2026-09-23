@@ -1,5 +1,7 @@
+import { slot } from '../../../tests/helpers/builders/slot';
 import type { LogContext } from '../../application/ports/logger.port';
-import { JsonLogger } from './json.logger';
+import { SlotUnavailableError } from '../../domain/errors/slot-unavailable.error';
+import { JsonLogger, createLineWriter, stdoutWriter } from './json.logger';
 
 const FIXED_NOW = new Date('2026-06-10T12:34:56.789Z');
 
@@ -110,6 +112,39 @@ describe('JsonLogger', () => {
     });
   });
 
+  it('serializa o code de um DomainError junto com name, message e stack', () => {
+    const { sut, lines } = makeSut();
+    const failure = new SlotUnavailableError(1, slot('2026-06-10 09:00'));
+
+    sut.error('erro de domínio lançado', { error: failure });
+
+    expect(parseLine(lines[0])).toMatchObject({
+      error: {
+        name: 'SlotUnavailableError',
+        message: failure.message,
+        stack: failure.stack,
+        code: 'SLOT_UNAVAILABLE',
+      },
+    });
+  });
+
+  it('omite code quando o Error não tem', () => {
+    const { sut, lines } = makeSut();
+
+    sut.error('erro comum', { error: new Error('falha') });
+
+    expect(parseLine(lines[0])).not.toHaveProperty('error.code');
+  });
+
+  it('omite code quando ele não é texto', () => {
+    const { sut, lines } = makeSut();
+    const failure = Object.assign(new Error('falha'), { code: 42 });
+
+    sut.error('erro com code numérico', { error: failure });
+
+    expect(parseLine(lines[0])).not.toHaveProperty('error.code');
+  });
+
   it('não lança e escreve a linha sem o contexto quando ele não é serializável', () => {
     const { sut, lines } = makeSut();
     const circular: Record<string, unknown> = { requestId: 'req-3' };
@@ -126,5 +161,59 @@ describe('JsonLogger', () => {
       timestamp: '2026-06-10T12:34:56.789Z',
       message: 'contexto circular',
     });
+  });
+});
+
+/** Stream mínimo compatível com `process.stdout.write` para capturar o que foi escrito. */
+function makeStream(): {
+  stream: { write: (chunk: string | Uint8Array) => boolean };
+  chunks: string[];
+} {
+  const chunks: string[] = [];
+  const stream = {
+    write: (chunk: string | Uint8Array): boolean => {
+      chunks.push(typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8'));
+      return true;
+    },
+  };
+  return { stream, chunks };
+}
+
+describe('createLineWriter', () => {
+  it('escreve a linha no stream acrescentando a quebra de linha', () => {
+    const { stream, chunks } = makeStream();
+    const write = createLineWriter(stream);
+
+    write('{"level":"info"}');
+
+    expect(chunks).toEqual(['{"level":"info"}\n']);
+  });
+
+  it('faz o JsonLogger produzir uma entrada por linha no stream', () => {
+    const { stream, chunks } = makeStream();
+    const logger = new JsonLogger(createLineWriter(stream), () => FIXED_NOW);
+
+    logger.info('primeiro');
+    logger.info('segundo');
+
+    expect(chunks.join('').split('\n')).toEqual([
+      '{"level":"info","timestamp":"2026-06-10T12:34:56.789Z","message":"primeiro"}',
+      '{"level":"info","timestamp":"2026-06-10T12:34:56.789Z","message":"segundo"}',
+      '',
+    ]);
+  });
+});
+
+describe('stdoutWriter', () => {
+  it('escreve no process.stdout com quebra de linha', () => {
+    const spy = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    try {
+      stdoutWriter('{"level":"info"}');
+
+      expect(spy).toHaveBeenCalledWith('{"level":"info"}\n');
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
