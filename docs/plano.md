@@ -26,9 +26,9 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 
 ## Fase 3 — Infraestrutura
 
-- [ ] Seed mock (médicos 1 e 2 idênticos ao enunciado + 3 extras)
-- [ ] `InMemoryScheduleRepository` com `reserveSlot` atômico + testes
-- [ ] `InMemoryAppointmentRepository`, `CryptoIdGenerator`, `JsonLogger`
+- [x] Seed mock (médicos 1 e 2 idênticos ao enunciado + 3 extras)
+- [x] `InMemoryScheduleRepository` com `reserveSlot` atômico + testes
+- [x] `InMemoryAppointmentRepository`, `CryptoIdGenerator`, `JsonLogger`
 
 ## Fase 4 — Camada HTTP + Serverless
 
