@@ -32,10 +32,12 @@ cruzadas, o que exige escolher uma combinação compatível e justificar cada ve
 | typescript-eslint      | 8.70.1   | devDependencies |
 | eslint-config-prettier | 10.1.8   | devDependencies |
 | prettier               | 3.9.9    | devDependencies |
+| @types/aws-lambda      | 8.10.163 | devDependencies |
+| zod                    | 4.6.5    | dependencies    |
 
-`@types/aws-lambda` (exigido por `docs/regras/testes.md`) entra na Fase 4, junto com os handlers.
-Nenhuma dependência de runtime na Fase 1. `zod` e `@anthropic-ai/sdk` entram como `dependencies`
-nas fases que os usam (4 e 5), com versão verificada naquele momento.
+Nenhuma dependência de runtime na Fase 1. `zod` e `@types/aws-lambda` (exigido por
+`docs/regras/testes.md`) entraram na Fase 4, junto com a camada HTTP; `@anthropic-ai/sdk` entra
+como `dependencies` na Fase 5, com versão verificada naquele momento.
 
 ### Matriz de compatibilidade verificada
 

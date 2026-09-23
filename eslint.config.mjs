@@ -25,6 +25,8 @@ export default defineConfig(
       'no-console': 'error',
       // docs/regras/typescript.md exige `ReadonlyArray<T>`; o padrão do stylistic ('array') o proibiria.
       '@typescript-eslint/array-type': ['error', { default: 'array', readonly: 'generic' }],
+      // Métodos de controller sem corpo ainda declaram `_request`: o decorator exige a assinatura (ADR-007).
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
   {
