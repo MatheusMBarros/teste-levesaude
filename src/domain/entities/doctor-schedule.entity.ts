@@ -3,6 +3,7 @@ import { err, ok } from '../../shared/result';
 import { SlotNotOfferedError } from '../errors/slot-not-offered.error';
 import { SlotUnavailableError } from '../errors/slot-unavailable.error';
 import type { SlotDateTime } from '../value-objects/slot-date-time.value-object';
+import type { Specialty } from '../value-objects/specialty.value-object';
 import type { Doctor } from './doctor.entity';
 
 export type ReserveError = SlotNotOfferedError | SlotUnavailableError;
@@ -10,7 +11,7 @@ export type ReserveError = SlotNotOfferedError | SlotUnavailableError;
 export interface DoctorScheduleProps {
   readonly doctorId: number;
   readonly doctorName: string;
-  readonly specialty: string;
+  readonly specialty: Specialty;
   readonly offeredSlots: ReadonlyArray<SlotDateTime>;
 }
 

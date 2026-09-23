@@ -1,3 +1,5 @@
+import type { Specialty } from '../../domain/value-objects/specialty.value-object';
+
 /**
  * Registro bruto de um médico no seed: dados planos, com horários em texto `YYYY-MM-DD HH:mm`
  * (D2). Fica em texto para o arquivo espelhar o enunciado; a conversão para o agregado
@@ -6,7 +8,7 @@
 export interface DoctorSeed {
   readonly id: number;
   readonly name: string;
-  readonly specialty: string;
+  readonly specialty: Specialty;
   readonly availableSlots: ReadonlyArray<string>;
 }
 

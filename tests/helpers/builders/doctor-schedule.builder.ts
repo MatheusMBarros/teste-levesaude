@@ -1,4 +1,5 @@
 import { DoctorSchedule } from '../../../src/domain/entities/doctor-schedule.entity';
+import type { Specialty } from '../../../src/domain/value-objects/specialty.value-object';
 import { slot } from './slot';
 
 /**
@@ -8,7 +9,7 @@ import { slot } from './slot';
 export class DoctorScheduleBuilder {
   private doctorId = 1;
   private doctorName = 'Dr. João Silva';
-  private specialty = 'Cardiologista';
+  private specialty: Specialty = 'Cardiologista';
   private offeredSlots: ReadonlyArray<string> = [
     '2026-06-10 09:00',
     '2026-06-10 10:00',
@@ -26,7 +27,7 @@ export class DoctorScheduleBuilder {
     return this;
   }
 
-  withSpecialty(specialty: string): this {
+  withSpecialty(specialty: Specialty): this {
     this.specialty = specialty;
     return this;
   }

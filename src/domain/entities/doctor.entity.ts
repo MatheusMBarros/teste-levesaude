@@ -1,3 +1,4 @@
+import type { Specialty } from '../value-objects/specialty.value-object';
 import type { SlotDateTime } from '../value-objects/slot-date-time.value-object';
 
 /**
@@ -8,6 +9,6 @@ import type { SlotDateTime } from '../value-objects/slot-date-time.value-object'
 export interface Doctor {
   readonly id: number;
   readonly name: string;
-  readonly specialty: string;
+  readonly specialty: Specialty;
   readonly availableSlots: ReadonlyArray<SlotDateTime>;
 }

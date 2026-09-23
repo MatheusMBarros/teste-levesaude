@@ -117,6 +117,18 @@ describe('DOCTORS_SEED', () => {
     },
   );
 
+  it('não compila com especialidade fora da lista fechada', () => {
+    const invalid: DoctorSeed = {
+      id: 99,
+      name: 'Dr. Fora da Lista',
+      // @ts-expect-error: 'Neurologista' não faz parte de SPECIALTIES
+      specialty: 'Neurologista',
+      availableSlots: [],
+    };
+
+    expect(invalid.specialty).toBe('Neurologista');
+  });
+
   it('usa ids únicos para os médicos', () => {
     const ids = DOCTORS_SEED.map((seed) => seed.id);
 
