@@ -62,4 +62,8 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [ ] README com a seção "Por que uma Lambda para duas rotas": restrição do estado em memória (D6, D7, D15, ADR-008) e a alternativa em produção (uma função por endpoint + DynamoDB com `ConditionExpression` para a reserva atômica)
 - [ ] ADRs revisados
 - [ ] `requests.http` ou coleção de exemplos cURL
+- [ ] `GatewayResponse` para rota inexistente com 404 (`MISSING_AUTHENTICATION_TOKEN`/`RESOURCE_NOT_FOUND`: a AWS REST devolve 403 por padrão) e nota no README de que o serverless-offline ignora `GatewayResponses` e devolve o 404 dele, fora do formato do contrato
+- [ ] Arredondar `durationMs` no `@LogRequest`
+- [ ] `timeout: 6` repetido na função `schedule` (já é o `provider.timeout`): remover ou comentar que é explícito de propósito
+- [ ] Teste de rota desconhecida conferir `method` e `resource` no log
 - [ ] Revisão final como avaliador
