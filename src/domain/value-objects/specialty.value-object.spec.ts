@@ -3,9 +3,7 @@ import { SPECIALTIES } from './specialty.value-object';
 
 describe('SPECIALTIES', () => {
   it('define a lista fechada de especialidades atendidas, incluindo Clínico Geral', () => {
-    const specialties = Object.values(SPECIALTIES);
-
-    expect(specialties).toEqual([
+    expect(SPECIALTIES).toEqual([
       'Cardiologista',
       'Dermatologista',
       'Pediatra',
