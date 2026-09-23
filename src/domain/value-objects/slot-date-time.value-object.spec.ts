@@ -121,4 +121,33 @@ describe('SlotDateTime', () => {
       expect(first.equals(second)).toBe(false);
     });
   });
+
+  describe('isBefore', () => {
+    it.each([
+      ['2026-06-10 09:00', '2026-06-10 10:00', 'hora anterior no mesmo dia'],
+      ['2026-06-10 09:00', '2026-06-10 09:01', 'minuto anterior'],
+      ['2026-06-10 23:59', '2026-06-11 00:00', 'dia anterior'],
+      ['2026-05-31 10:00', '2026-06-01 08:00', 'mês anterior'],
+      ['2025-12-31 23:59', '2026-01-01 00:00', 'ano anterior'],
+    ])('considera %s antes de %s (%s)', (earlier, later) => {
+      const result = SlotDateTime.create(earlier);
+      const other = SlotDateTime.create(later);
+
+      expect(expectOk(result).isBefore(expectOk(other))).toBe(true);
+    });
+
+    it('não considera um horário antes de um horário anterior a ele', () => {
+      const later = expectOk(SlotDateTime.create('2026-06-10 10:00'));
+      const earlier = expectOk(SlotDateTime.create('2026-06-10 09:00'));
+
+      expect(later.isBefore(earlier)).toBe(false);
+    });
+
+    it('não considera um horário antes de si mesmo', () => {
+      const first = expectOk(SlotDateTime.create('2026-06-10 09:00'));
+      const second = expectOk(SlotDateTime.create('2026-06-10 09:00'));
+
+      expect(first.isBefore(second)).toBe(false);
+    });
+  });
 });

@@ -72,6 +72,14 @@ export class SlotDateTime {
     return this.value === other.value;
   }
 
+  /**
+   * Ordem cronológica. O formato é de largura fixa e vai do campo mais significativo ao menos
+   * (ano → minuto), então a ordem lexicográfica do texto canônico é a ordem cronológica.
+   */
+  isBefore(other: SlotDateTime): boolean {
+    return this.value < other.value;
+  }
+
   /** Devolve o texto canônico `YYYY-MM-DD HH:mm`, idêntico ao recebido em `create`. */
   toString(): string {
     return this.value;
