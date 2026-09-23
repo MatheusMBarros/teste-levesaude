@@ -16,6 +16,8 @@ src/
   infrastructure/    # implementações concretas das portas (in-memory, crypto, Anthropic, logger)
     repositories/
     mocks/
+    id-generator/
+    logger/
     llm/
   interfaces/http/   # tradução HTTP <-> casos de uso
     handlers/        # entrypoints Lambda (finos)
