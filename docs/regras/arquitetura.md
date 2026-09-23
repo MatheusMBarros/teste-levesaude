@@ -60,7 +60,7 @@ Um handler só: recebe o evento → chama o controller do container → retorna.
 ## SOLID (onde aparece)
 
 - S: handler / controller / caso de uso / repositório / presenter com uma responsabilidade cada.
-- O: novos provedores de LLM entram implementando `TriageModel`, sem alterar o caso de uso.
+- O: novos provedores de LLM entram pela configuração da fábrica (provider da Vercel AI SDK em `AiSdkTriageModel`) ou implementando `TriageModel`, sem alterar o caso de uso. Políticas de falha (`RetryingTriageModel`, `FailoverTriageModel`) são decorators da porta: implementam `TriageModel` e envolvem outro `TriageModel`, então entram ou saem da cadeia sem mudar o adapter nem o caso de uso.
 - L: `InMemory*Repository` e fakes de teste são intercambiáveis com qualquer implementação da porta.
 - I: portas pequenas (`IdGenerator`, `ScheduleRepository`, `AppointmentRepository` separados).
 - D: casos de uso dependem de abstrações; concretos só em `main/`.

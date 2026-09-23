@@ -25,7 +25,7 @@ ambíguo e não houver decisão registrada, PARE e pergunte antes de decidir.
 
 Node.js >= 20.19 (runtime `nodejs20.x`, ver D18 / ADR-001) · TypeScript 5.9 strict · Serverless Framework v3 + serverless-esbuild + serverless-offline v13 ·
 AWS Lambda + API Gateway **REST** (eventos `http`, não `httpApi`) · Zod · Jest (ts-jest) ·
-ESLint (typescript-eslint, flat config) + Prettier · @anthropic-ai/sdk (triagem)
+ESLint (typescript-eslint, flat config) + Prettier · Vercel AI SDK (ai + @ai-sdk/anthropic, @ai-sdk/openai, @ai-sdk/google) (triagem)
 
 ## Comandos
 
@@ -38,14 +38,14 @@ ESLint (typescript-eslint, flat config) + Prettier · @anthropic-ai/sdk (triagem
 
 ## Subagentes (`.claude/agents/`)
 
-| Agente          | Papel                                                                               | Escreve código de produção? |
-| --------------- | ----------------------------------------------------------------------------------- | --------------------------- |
-| `arquiteto`     | Define contratos (interfaces, tipos, erros), pastas e ADRs antes de cada fase       | Só tipos/interfaces         |
-| `dev-backend`   | Implementa seguindo os contratos, até os testes passarem                            | Sim                         |
-| `testador`      | Escreve testes (unit/integração/e2e) a partir dos contratos, antes da implementação | Não (só testes)             |
-| `engenheiro-ia` | Endpoint `/triagem`: prompt, adapter do LLM, tratamento de falhas                   | Sim (escopo triagem)        |
-| `revisor`       | Revisa como o avaliador revisaria; aponta problemas, não corrige                    | Não                         |
-| `documentador`  | README, ADRs, `.env.example`, guia de execução/deploy                               | Não (só docs)               |
+| Agente          | Papel                                                                                                    | Escreve código de produção? |
+| --------------- | -------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `arquiteto`     | Define contratos (interfaces, tipos, erros), pastas e ADRs antes de cada fase                            | Só tipos/interfaces         |
+| `dev-backend`   | Implementa seguindo os contratos, até os testes passarem                                                 | Sim                         |
+| `testador`      | Escreve testes (unit/integração/e2e) a partir dos contratos, antes da implementação                      | Não (só testes)             |
+| `engenheiro-ia` | `POST /triagem` multi-provedor via Vercel AI SDK: prompt, políticas de falha, separação negócio × modelo | Sim (escopo triagem)        |
+| `revisor`       | Revisa como o avaliador revisaria; aponta problemas, não corrige                                         | Não                         |
+| `documentador`  | README, ADRs, `.env.example`, guia de execução/deploy                                                    | Não (só docs)               |
 
 Orquestração: **sequencial por fase** (arquiteto → testador → dev-backend → revisor → commit).
 Paralelize apenas trabalho sem arquivos em comum (ex.: documentador enquanto testador escreve e2e).
