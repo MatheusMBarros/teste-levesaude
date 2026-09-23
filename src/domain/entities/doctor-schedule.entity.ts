@@ -1,5 +1,6 @@
 import type { Result } from '../../shared/result';
 import { err, ok } from '../../shared/result';
+import { DuplicateSlotError } from '../errors/duplicate-slot.error';
 import { SlotNotOfferedError } from '../errors/slot-not-offered.error';
 import { SlotUnavailableError } from '../errors/slot-unavailable.error';
 import type { SlotDateTime } from '../value-objects/slot-date-time.value-object';
@@ -17,6 +18,7 @@ export interface DoctorScheduleProps {
 
 /**
  * Agregado imutável da agenda de um médico: horários ofertados e horários já reservados.
+ * Invariante: `offeredSlots` sem horários repetidos (`create` devolve `DuplicateSlotError`).
  * Concentra a regra de negócio da reserva (ADR-004):
  * - horário fora de `offeredSlots` → `SlotNotOfferedError` (422, ADR-003);
  * - horário ofertado mas já reservado → `SlotUnavailableError` (409);
@@ -29,8 +31,14 @@ export class DoctorSchedule {
     private readonly reservedSlots: ReadonlyArray<SlotDateTime>,
   ) {}
 
-  static create(props: DoctorScheduleProps): DoctorSchedule {
-    return new DoctorSchedule(props, []);
+  static create(props: DoctorScheduleProps): Result<DoctorSchedule, DuplicateSlotError> {
+    const duplicate = props.offeredSlots.find((offered, index) =>
+      props.offeredSlots.slice(0, index).some((previous) => previous.equals(offered)),
+    );
+    if (duplicate) {
+      return err(new DuplicateSlotError(props.doctorId, duplicate));
+    }
+    return ok(new DoctorSchedule(props, []));
   }
 
   get doctorId(): number {

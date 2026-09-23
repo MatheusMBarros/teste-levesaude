@@ -20,24 +20,18 @@ function assertUniqueDoctorIds(seed: ReadonlyArray<DoctorSeed>): void {
   }
 }
 
-function assertUniqueSlots(doctor: DoctorSeed): void {
-  const seen = new Set<string>();
-  for (const value of doctor.availableSlots) {
-    if (seen.has(value)) {
-      throw new Error(`Duplicate slot "${value}" in seed for doctor ${String(doctor.id)}`);
-    }
-    seen.add(value);
-  }
-}
-
 function toDoctorSchedule(seed: DoctorSeed): DoctorSchedule {
-  assertUniqueSlots(seed);
-  return DoctorSchedule.create({
+  const created = DoctorSchedule.create({
     doctorId: seed.id,
     doctorName: seed.name,
     specialty: seed.specialty,
     offeredSlots: seed.availableSlots.map((value) => parseSlot(value, seed.id)),
   });
+  if (!created.ok) {
+    const { slot, doctorId } = created.error;
+    throw new Error(`Duplicate slot "${slot.toString()}" in seed for doctor ${String(doctorId)}`);
+  }
+  return created.value;
 }
 
 /**

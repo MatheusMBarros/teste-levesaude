@@ -1,6 +1,7 @@
 import { aDoctorSchedule } from '../../../tests/helpers/builders/doctor-schedule.builder';
 import { slot } from '../../../tests/helpers/builders/slot';
 import { expectErr, expectOk } from '../../../tests/helpers/result-assertions';
+import { DuplicateSlotError } from '../errors/duplicate-slot.error';
 import { SlotNotOfferedError } from '../errors/slot-not-offered.error';
 import { SlotUnavailableError } from '../errors/slot-unavailable.error';
 import type { Doctor } from './doctor.entity';
@@ -11,6 +12,42 @@ function availableSlotsOf(doctor: Doctor): ReadonlyArray<string> {
 }
 
 describe('DoctorSchedule', () => {
+  describe('create', () => {
+    it('cria a agenda quando os horários ofertados são distintos', () => {
+      const result = DoctorSchedule.create({
+        doctorId: 1,
+        doctorName: 'Dr. João Silva',
+        specialty: 'Cardiologista',
+        offeredSlots: [slot('2026-06-10 09:00'), slot('2026-06-10 10:00')],
+      });
+
+      const schedule = expectOk(result);
+
+      expect(availableSlotsOf(schedule.toDoctor())).toEqual([
+        '2026-06-10 09:00',
+        '2026-06-10 10:00',
+      ]);
+    });
+
+    it('retorna DuplicateSlotError quando um horário é ofertado mais de uma vez', () => {
+      const result = DoctorSchedule.create({
+        doctorId: 42,
+        doctorName: 'Dr. João Silva',
+        specialty: 'Cardiologista',
+        offeredSlots: [
+          slot('2026-06-10 09:00'),
+          slot('2026-06-10 10:00'),
+          slot('2026-06-10 09:00'),
+        ],
+      });
+
+      const error = expectErr(result);
+
+      expect(error).toBeInstanceOf(DuplicateSlotError);
+      expect(error).toMatchObject({ doctorId: 42, slot: slot('2026-06-10 09:00') });
+    });
+  });
+
   describe('doctorId', () => {
     it('expõe o id do médico', () => {
       const schedule = aDoctorSchedule().withId(7).build();
@@ -21,12 +58,14 @@ describe('DoctorSchedule', () => {
 
   describe('toDoctor', () => {
     it('expõe id, nome, especialidade e todos os horários ofertados quando nada foi reservado', () => {
-      const schedule = DoctorSchedule.create({
-        doctorId: 1,
-        doctorName: 'Dr. João Silva',
-        specialty: 'Cardiologista',
-        offeredSlots: [slot('2026-06-10 09:00'), slot('2026-06-10 10:00')],
-      });
+      const schedule = expectOk(
+        DoctorSchedule.create({
+          doctorId: 1,
+          doctorName: 'Dr. João Silva',
+          specialty: 'Cardiologista',
+          offeredSlots: [slot('2026-06-10 09:00'), slot('2026-06-10 10:00')],
+        }),
+      );
 
       const doctor = schedule.toDoctor();
 

@@ -1,6 +1,7 @@
 import { slot } from '../../../tests/helpers/builders/slot';
 import { DoctorNotFoundError } from './doctor-not-found.error';
 import { DomainError } from './domain.error';
+import { DuplicateSlotError } from './duplicate-slot.error';
 import { InvalidSlotDateTimeError } from './invalid-slot-date-time.error';
 import { SlotNotOfferedError } from './slot-not-offered.error';
 import { SlotUnavailableError } from './slot-unavailable.error';
@@ -30,6 +31,12 @@ const cases: ReadonlyArray<DomainErrorCase> = [
     className: 'SlotUnavailableError',
     create: () => new SlotUnavailableError(1, slot('2026-06-10 09:00')),
     code: 'SLOT_UNAVAILABLE',
+    context: () => ({ doctorId: 1, slot: slot('2026-06-10 09:00') }),
+  },
+  {
+    className: 'DuplicateSlotError',
+    create: () => new DuplicateSlotError(1, slot('2026-06-10 09:00')),
+    code: 'DUPLICATE_SLOT',
     context: () => ({ doctorId: 1, slot: slot('2026-06-10 09:00') }),
   },
   {

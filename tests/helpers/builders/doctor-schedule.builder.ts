@@ -44,12 +44,16 @@ export class DoctorScheduleBuilder {
   }
 
   build(): DoctorSchedule {
-    const initial = DoctorSchedule.create({
+    const created = DoctorSchedule.create({
       doctorId: this.doctorId,
       doctorName: this.doctorName,
       specialty: this.specialty,
       offeredSlots: this.offeredSlots.map(slot),
     });
+    if (!created.ok) {
+      throw new Error(`Dado de teste inválido: ${created.error.message}`);
+    }
+    const initial = created.value;
 
     return this.reservedSlots.reduce((schedule, reserved) => {
       const result = schedule.reserve(slot(reserved));
