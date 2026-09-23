@@ -33,3 +33,46 @@ custom:
   serverless-offline:
     noPrependStageInUrl: true
     httpPort: 3000
+
+functions:
+  # GET /agendas e POST /agendamento na MESMA função de propósito (D15, ADR-008): Lambdas distintas não
+  # compartilham memória, e o horário reservado precisa sumir do GET (D6). Em produção seria uma função
+  # por endpoint com estado externo (ex.: DynamoDB).
+  schedule:
+    handler: src/interfaces/http/handlers/schedule-handler.handler
+    timeout: 6
+    events:
+      - http:
+          path: agendas
+          method: get
+          cors: true
+      - http:
+          path: agendamento
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    # Erros gerados pelo próprio API Gateway (rota inexistente, 403...) no formato { erro, mensagem } (D19).
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ResponseType: DEFAULT_4XX
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Content-Type: "'application/json; charset=utf-8'"
+        ResponseTemplates:
+          application/json: '{"erro":"Requisição não atendida","mensagem":"A rota ou o método solicitado não existe, ou a requisição foi recusada pelo gateway."}'
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ResponseType: DEFAULT_5XX
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Content-Type: "'application/json; charset=utf-8'"
+        ResponseTemplates:
+          application/json: '{"erro":"Erro interno","mensagem":"Ocorreu um erro inesperado. Tente novamente mais tarde."}'
