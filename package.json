@@ -16,7 +16,7 @@
     "format:check": "prettier --check .",
     "test": "jest --selectProjects unit integration",
     "test:unit": "jest --selectProjects unit",
-    "test:integration": "jest --selectProjects integration --passWithNoTests",
+    "test:integration": "jest --selectProjects integration",
     "test:e2e": "jest --selectProjects e2e",
     "test:coverage": "jest --selectProjects unit integration --coverage",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage"
