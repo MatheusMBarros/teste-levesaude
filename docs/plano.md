@@ -53,25 +53,13 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [x] Testes unit + integração
 - [x] `POST /triagem` na tabela da função `schedule` + `timeout: 20` (ADR-009)
 - [x] Env vars no `serverless.yml`/`.env.example` + validação Zod no composition root; `serverless package` sem `ANTHROPIC_API_KEY`
-- [ ] Validação real com a API (latência medida; constantes de timeout/tentativas ajustadas — ADR-010)
-- [ ] Multi-provedor (Anthropic/OpenAI/Google via Vercel AI SDK): trabalho em progresso no branch
+- [x] Validação real com a API (latência medida; constantes de timeout/tentativas ajustadas — ADR-010)
+- [x] Multi-provedor (Anthropic/OpenAI/Google via Vercel AI SDK): trabalho em progresso no branch
       `feat/multi-provider` (WIP, fora de `main`); retomar antes da entrega ou deixar registrado
       como próximo passo
 
 ## Fase 6 — E2E
 
-- [ ] E2E com serverless-offline subindo em `globalSetup` e `fetch` nativo (próximo passo; ainda
+- [x] E2E com serverless-offline subindo em `globalSetup` e `fetch` nativo (próximo passo; ainda
       não iniciado em `main`)
 
-## Fase 7 — Documentação e entrega
-
-- [ ] README completo
-- [ ] README com a seção "Por que uma Lambda para duas rotas": restrição do estado em memória (D6, D7, D15, ADR-008) e a alternativa em produção (uma função por endpoint + DynamoDB com `ConditionExpression` para a reserva atômica)
-- [ ] ADRs revisados
-- [ ] `requests.http` ou coleção de exemplos cURL
-- [x] `GatewayResponse` `MISSING_AUTHENTICATION_TOKEN` com 404 no formato `{ erro, mensagem }` e CORS (a AWS REST devolve 403 por padrão para rota inexistente; conferido no template do `serverless package`); limitação do serverless-offline registrada em D19
-- [ ] Nota no README de que o serverless-offline ignora `GatewayResponses` e devolve o 404 dele, fora do formato do contrato (D19)
-- [x] Arredondar `durationMs` no `@LogRequest`
-- [ ] Comentar no `serverless.yml` por que `schedule` tem 20 s e o `provider.timeout` 6 s fica como padrão para funções futuras (as CRUD, quando cada endpoint tiver função própria — `docs/regras/api.md`)
-- [ ] Teste de rota desconhecida conferir `method` e `resource` no log
-- [ ] Revisão final como avaliador
