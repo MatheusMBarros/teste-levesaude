@@ -12,7 +12,12 @@ import { URGENCY_LEVELS } from '../../domain/value-objects/urgency.value-object'
  * `TriageClassification` ("`specialty` pertence a `allowedSpecialties`"). Segunda barreira depois
  * do `enum` do `input_schema` (a tool usa `strict: false`, ADR-010): especialidade fora da lista,
  * urgência desconhecida, justificativa vazia/longa ou campo extra tornam a saída inválida
- * (retentativa, depois 502). O teto de 500 dá folga sobre os 300 caracteres pedidos no prompt.
+ * (retentativa, depois 502).
+ *
+ * Tamanho da justificativa: o prompt pede até 300 caracteres, mas o schema aceita até 500 de
+ * propósito. Modelos não contam caracteres com precisão; um estouro pequeno ainda é uma resposta
+ * útil e não deve gastar retentativa nem virar 502. O teto de 500 só barra saída claramente fora
+ * do combinado.
  */
 export function triageOutputSchema(
   allowed: TriageRequest['allowedSpecialties'],
