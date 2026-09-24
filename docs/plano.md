@@ -67,7 +67,7 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [ ] `requests.http` ou coleção de exemplos cURL
 - [x] `GatewayResponse` `MISSING_AUTHENTICATION_TOKEN` com 404 no formato `{ erro, mensagem }` e CORS (a AWS REST devolve 403 por padrão para rota inexistente; conferido no template do `serverless package`); limitação do serverless-offline registrada em D19
 - [ ] Nota no README de que o serverless-offline ignora `GatewayResponses` e devolve o 404 dele, fora do formato do contrato (D19)
-- [ ] Arredondar `durationMs` no `@LogRequest`
+- [x] Arredondar `durationMs` no `@LogRequest`
 - [ ] Comentar no `serverless.yml` por que `schedule` tem 20 s e o `provider.timeout` 6 s fica como padrão para funções futuras (as CRUD, quando cada endpoint tiver função própria — `docs/regras/api.md`)
 - [ ] Teste de rota desconhecida conferir `method` e `resource` no log
 - [ ] Revisão final como avaliador

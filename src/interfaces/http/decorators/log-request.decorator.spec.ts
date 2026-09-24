@@ -66,13 +66,13 @@ describe('LogRequest', () => {
     });
   });
 
-  it('registra a duração da requisição em milissegundos', async () => {
+  it('registra a duração da requisição em milissegundos inteiros', async () => {
     const { controller, logs } = makeSut();
 
     await controller.run(anHttpRequest());
 
     const durationMs = logs.entries[0]?.durationMs;
-    expect(typeof durationMs).toBe('number');
+    expect(Number.isInteger(durationMs)).toBe(true);
     expect(durationMs).toBeGreaterThanOrEqual(0);
   });
 

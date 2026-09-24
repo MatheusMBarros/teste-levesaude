@@ -14,7 +14,7 @@ export function LogRequest<This extends WithLogger, TSuccess>(
       method: request.method,
       resource: request.resource,
       statusCode: response.statusCode,
-      durationMs: performance.now() - startedAt,
+      durationMs: Math.round(performance.now() - startedAt),
     });
     return response;
   };
