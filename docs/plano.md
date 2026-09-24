@@ -54,10 +54,14 @@ Marque `[x]` apenas com `npm run check` verde. Uma fase por vez.
 - [x] `POST /triagem` na tabela da função `schedule` + `timeout: 20` (ADR-009)
 - [x] Env vars no `serverless.yml`/`.env.example` + validação Zod no composition root; `serverless package` sem `ANTHROPIC_API_KEY`
 - [ ] Validação real com a API (latência medida; constantes de timeout/tentativas ajustadas — ADR-010)
+- [ ] Multi-provedor (Anthropic/OpenAI/Google via Vercel AI SDK): trabalho em progresso no branch
+      `feat/multi-provider` (WIP, fora de `main`); retomar antes da entrega ou deixar registrado
+      como próximo passo
 
 ## Fase 6 — E2E
 
-- [ ] E2E com serverless-offline subindo em `globalSetup` e `fetch` nativo
+- [ ] E2E com serverless-offline subindo em `globalSetup` e `fetch` nativo (próximo passo; ainda
+      não iniciado em `main`)
 
 ## Fase 7 — Documentação e entrega
 

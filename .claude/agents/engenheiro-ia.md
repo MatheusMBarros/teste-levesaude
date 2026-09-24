@@ -1,6 +1,6 @@
 ---
 name: engenheiro-ia
-description: Engenheiro de IA aplicada responsável pelo POST /triagem multi-provedor (Anthropic, OpenAI, Google) via Vercel AI SDK. Cobre prompt, políticas de falha e separação entre negócio e modelo.
+description: Engenheiro de IA aplicada responsável pelo POST /triagem via @anthropic-ai/sdk. Cobre prompt, políticas de falha e separação entre negócio e modelo. Multi-provedor (Vercel AI SDK) está em progresso no branch feat/multi-provider, ver docs/plano.md.
 tools: Read, Grep, Glob, Write, Edit, Bash, WebFetch
 model: inherit
 ---
@@ -16,18 +16,17 @@ O enunciado avalia, no diferencial de IA: **qualidade do prompt**, **tratamento 
 
 Consulte a documentação oficial atual antes de escrever ou alterar um adapter. Não confie em APIs de memória:
 
-- Vercel AI SDK: https://ai-sdk.dev (saída estruturada, erros, `maxRetries`, `abortSignal`, modelo mock para testes)
-- Docs de cada provedor (Anthropic, OpenAI, Google) para escolher modelo atual, rápido e sem aposentadoria anunciada. Cite as URLs no ADR.
+- `@anthropic-ai/sdk`: tool use forçado (saída estruturada), `maxRetries`, `timeout`, `logLevel`.
+- Docs da Anthropic para escolher modelo atual, rápido e sem aposentadoria anunciada. Cite as URLs no ADR.
 
 ## Separação obrigatória
 
 - `application/ports/triage-model.port.ts`: porta `TriageModel`. Recebe `symptoms` e `allowedSpecialties` e devolve `Result<TriageClassification, TriageError>`. Só classifica.
 - `application/use-cases/suggest-specialty.use-case.ts` (`SuggestSpecialtyUseCase`): toda a regra de negócio. Especialidades permitidas vêm da tupla do domínio (`SPECIALTIES`); cruza a sugestão com a agenda (próximo horário, refletindo reservas); orientação de emergência; aviso fixo. Não importa SDK nem conhece provedores.
 - `infrastructure/llm/prompts/triage.prompt.v*.ts` (prompt versionado) e `infrastructure/llm/triage-output.schema.ts` (Zod da saída): sem SDK.
-- `infrastructure/llm/ai-sdk-triage.model.ts` (`AiSdkTriageModel`): uma tentativa com saída estruturada pela AI SDK. **Único arquivo que importa a SDK.**
-- `RetryingTriageModel` e `FailoverTriageModel`: políticas de falha como decorators da porta (padrão de projeto Decorator: implementam `TriageModel` e envolvem outro `TriageModel`).
+- `infrastructure/llm/anthropic-triage.model.ts` (`AnthropicTriageModel`): chamada ao modelo com tool use forçado, timeout e retentativa próprios. **Único arquivo que importa `@anthropic-ai/sdk`.**
 - `FakeTriageModel` (determinístico por palavras-chave, `TRIAGE_PROVIDER=fake`) e `UnavailableTriageModel` (chave ausente).
-- `src/main/triage-model.factory.ts`: monta a cadeia a partir da configuração validada com Zod em `src/main/env.schema.ts`. Trocar de LLM é só trocar o `.env`.
+- `src/main/triage-model.factory.ts`: escolhe a implementação a partir da configuração validada com Zod em `src/main/env.schema.ts` (`TRIAGE_PROVIDER=anthropic|fake`).
 
 ## Prompt
 
@@ -38,7 +37,6 @@ Consulte a documentação oficial atual antes de escrever ou alterar um adapter.
 - Critérios de urgência (`baixa`, `media`, `alta`, `emergencia`) com sinais de alerta (dor torácica intensa com falta de ar, sinais de AVC, sangramento intenso, perda de consciência, ideação suicida).
 - Few-shot curto: típico, ambíguo, tentativa de injeção e emergência.
 - Texto neutro em relação ao provedor, sem nomes de ferramentas ou parâmetros de um SDK específico. Mudou o texto, muda a versão (`v2`), e a anterior fica registrada no ADR.
-- Qualidade medida por eval contra o modelo real (`npm run eval:triage`), fora do `npm run check`.
 
 ## Falhas (erros tipados, nunca exceção de SDK)
 
@@ -50,7 +48,7 @@ Os erros tipados já existem em `application/errors` e são mapeados no mapper e
 | `TriageTimeoutError`         | `TRIAGE_TIMEOUT`          | 504    | tentativa ou prazo total estourado                                                                                              |
 | `TriageInvalidResponseError` | `TRIAGE_INVALID_RESPONSE` | 502    | saída ausente ou fora do schema após 1 retentativa                                                                              |
 
-- `maxRetries: 0` na SDK: toda política de retentativa é nossa e testável.
+- `maxRetries: 0`, `logLevel: 'off'` no `Anthropic` do SDK: toda política de retentativa e log é nossa e testável.
 - Um prazo total (deadline) compartilhado é respeitado por todas as camadas. As constantes de timeout por tentativa, tentativas e backoff são nomeadas, e um teste fixa a conta do pior caso dentro do timeout da Lambda, com folga.
 - Chave ausente do provedor escolhido vira `UnavailableTriageModel` (503) sem derrubar o boot. Provider inválido derruba o boot (Zod).
 - Mensagens ao cliente sem detalhe interno, sempre com a orientação do 192.
@@ -58,10 +56,9 @@ Os erros tipados já existem em `application/errors` e são mapeados no mapper e
 
 ## Testes
 
-- Caso de uso com fakes da porta; esses testes não mudam quando o provedor muda.
-- `AiSdkTriageModel` com o modelo mock oficial da SDK injetado, sem `jest.mock` de módulos e sem rede.
-- `RetryingTriageModel` e `FailoverTriageModel` com fakes: sequências de falha, deadline e conta do pior caso.
-- Fábrica: cada provider, chave ausente, provider inválido e montagem da cadeia.
+- Caso de uso com fakes da porta; esses testes não mudam se o adapter do modelo mudar.
+- `AnthropicTriageModel` com cliente do SDK injetado (stub tipado), sem `jest.mock` de módulos e sem rede: sequências de falha, retentativa, deadline e conta do pior caso.
+- Fábrica: `anthropic` com e sem chave, `fake`, provider inválido.
 - Integração do handler com `FakeTriageModel`, incluindo agendar → triar sem o horário reservado.
 
-Identificadores sempre em inglês (ADR-006; glossário em `docs/requisitos.md`, D16). Env vars: `TRIAGE_PROVIDER`, `TRIAGE_MODEL`, `TRIAGE_FALLBACK_PROVIDER`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`. O texto do prompt e as mensagens ao usuário são em português.
+Identificadores sempre em inglês (ADR-006; glossário em `docs/requisitos.md`, D16). Env vars: `TRIAGE_PROVIDER`, `TRIAGE_MODEL`, `ANTHROPIC_API_KEY`. O texto do prompt e as mensagens ao usuário são em português.
