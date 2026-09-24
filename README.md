@@ -419,29 +419,3 @@ Não há script `deploy` no `package.json` — o comando é direto do Serverless
    ```bash
    npx serverless remove
    ```
-
-## Próximos passos
-
-Com mais tempo, nesta ordem de prioridade:
-
-- **Persistência real com DynamoDB** no lugar dos repositórios em memória, usando
-  `ConditionExpression` na reserva de horário para manter a atomicidade que hoje vem de
-  `reserveSlot` em memória (D14). Isso também permitiria separar `GET /agendas`, `POST /agendamento`
-  e `POST /triagem` em funções Lambda independentes (elas só estão juntas hoje por causa do estado
-  em memória — ver [Decisões importantes](#decisões-importantes)).
-- **Testes e2e** (`tests/e2e`, hoje vazio): subir o `serverless-offline` em `globalSetup` do Jest e
-  bater com `fetch` nativo nos três endpoints, fechando a pirâmide de testes (Fase 6 do
-  `docs/plano.md`).
-- **Multi-provedor na triagem** (Anthropic, OpenAI, Google, via Vercel AI SDK): trabalho iniciado no
-  branch `feat/multi-provider`, ainda não mesclado em `main`. A ideia é um adapter fino por cima do
-  SDK unificado e decorators de política de falha (retry/failover) compostos por cima da porta
-  `TriageModel`, sem alterar o caso de uso.
-- **Autenticação/autorização**: hoje qualquer cliente pode chamar os três endpoints; um token de API
-  (API Gateway API Key ou um autorizador Lambda) seria o próximo passo mínimo.
-- **Observabilidade**: métricas customizadas (CloudWatch Embedded Metric Format) para latência e
-  taxa de erro da triagem por `reason`/`code`, e tracing (AWS X-Ray) no caminho
-  Gateway → Lambda → chamada ao provedor de LLM.
-- **Idempotency key** em `POST /agendamento`: hoje um retry de rede do cliente após um 201 sem
-  resposta recebida pode gerar dois agendamentos diferentes no mesmo horário (o segundo falharia com
-  409, mas o cliente não tem como saber se o primeiro foi aceito). Uma chave de idempotência
-  (header, com TTL) evitaria essa ambiguidade.
