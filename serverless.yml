@@ -78,6 +78,22 @@ resources:
           gatewayresponse.header.Content-Type: "'application/json; charset=utf-8'"
         ResponseTemplates:
           application/json: '{"erro":"Requisição não atendida","mensagem":"A rota ou o método solicitado não existe, ou a requisição foi recusada pelo gateway."}'
+    # Rota inexistente: a AWS REST responde 403 "Missing Authentication Token" por padrão (o gateway
+    # não distingue rota ausente de requisição sem assinatura). Sem autorizador IAM nesta API, esse
+    # tipo só ocorre para rota/método inexistente, então vira 404 (D19). O serverless-offline não
+    # emula GatewayResponses: localmente a rota inexistente devolve o 404 dele, fora do formato.
+    GatewayResponseMissingAuthenticationToken:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ResponseType: MISSING_AUTHENTICATION_TOKEN
+        StatusCode: '404'
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Content-Type: "'application/json; charset=utf-8'"
+        ResponseTemplates:
+          application/json: '{"erro":"Rota não encontrada","mensagem":"A rota ou o método solicitado não existe."}'
     GatewayResponseDefault5XX:
       Type: AWS::ApiGateway::GatewayResponse
       Properties:
